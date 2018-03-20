@@ -5,13 +5,18 @@ package sample.helloworld.impl;
 
 import akka.Done;
 import akka.NotUsed;
+import akka.stream.javadsl.Source;
 import com.lightbend.lagom.javadsl.api.ServiceCall;
 import com.lightbend.lagom.javadsl.persistence.PersistentEntityRef;
 import com.lightbend.lagom.javadsl.persistence.PersistentEntityRegistry;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sample.helloworld.api.GreetingMessage;
 import sample.helloworld.api.HelloService;
 import sample.helloworld.impl.HelloCommand.*;
@@ -20,6 +25,7 @@ import sample.helloworld.impl.HelloCommand.*;
  * Implementation of the HelloService.
  */
 public class HelloServiceImpl implements HelloService {
+  private static final Logger log = LoggerFactory.getLogger(HelloServiceImpl.class);
 
   private final PersistentEntityRegistry persistentEntityRegistry;
 
@@ -48,6 +54,19 @@ public class HelloServiceImpl implements HelloService {
       return ref.ask(new UseGreetingMessage(request.message));
     };
 
+  }
+  @Override
+  public ServiceCall<NotUsed, Source<String, NotUsed>> debugEcho(Optional<String> message) {
+    String s = message.orElse("Hello world!");
+    return request -> CompletableFuture.completedFuture(
+            Source.range(0, 100000000)
+                    .map(i -> {
+                      String msg = s + i;
+                      if (i % 10000 == 10) {
+                        log.warn("Sending {}", msg);
+                      }
+                      return msg;
+                    }));
   }
 
 }
