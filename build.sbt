@@ -3,8 +3,6 @@ organization in ThisBuild := "sample.helloworld"
 // the Scala version that will be used for cross-compiled libraries
 scalaVersion in ThisBuild := "2.11.8"
 
-// SCALA SUPPORT: Remove the line below
-EclipseKeys.projectFlavor in Global := EclipseProjectFlavor.Java
 
 lazy val helloworldApi = project("helloworld-api")
   .settings(
